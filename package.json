@@ -1,7 +1,7 @@
 {
   "name": "uce-dragonbinder",
   "version": "0.0.0",
-  "description": "Use µce Custom Elements with Dragonbinder for state management",
+  "description": "µce Custom Elements with Dragonbinder for state management",
   "main": "./cjs/index.js",
   "scripts": {
     "build": "npm run cjs && npm run rollup:es && npm run rollup:index && npm run fix:default && npm run test",
@@ -17,10 +17,12 @@
   "license": "ISC",
   "devDependencies": {
     "coveralls": "^3.1.0",
+    "dragonbinder": "^2.2.0",
     "nyc": "^15.0.1",
     "rollup": "^2.11.2",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-terser": "^6.1.0",
+    "uce": "^0.13.1",
     "ucjs": "^0.1.1"
   },
   "module": "./esm/index.js",
