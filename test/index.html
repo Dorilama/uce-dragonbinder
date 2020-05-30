@@ -1,19 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>uce-dragonbinder</title>
-  <script type="module">
-  import(
-    /^(?:localhost|[0-9.]+)$/.test(location.hostname) ?
-    '../esm/index.js' :
-    'https://unpkg.com/uce-dragonbinder?module'
-  )
-  .then((module) => {
-    console.log(module);
-  });
-  </script>
-</head>
-<body></body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>dragonbinder-uce</title>
+    <script>
+      if (this.customElements)
+        try {
+          customElements.define(
+            "built-in",
+            document.createElement("p").constructor,
+            { extends: "p" }
+          );
+        } catch (s) {
+          document.write(
+            '<script src="//unpkg.com/@ungap/custom-elements-builtin"><\x2fscript>'
+          );
+        }
+      else
+        document.write(
+          '<script src="//unpkg.com/document-register-element"><\x2fscript>'
+        );
+    </script>
+    <script async src="//unpkg.com/uce"></script>
+    <script src="//unpkg.com/dragonbinder"></script>
+    <script type="module">
+      import(
+        /^(?:localhost|[0-9.]+)$/.test(location.hostname)
+          ? "../esm/index.js"
+          : "https://unpkg.com/dragonbinder-uce?module"
+      ).then((module) => {
+        const store = new Dragonbinder({
+          state: {
+            count: 0,
+            history: [],
+          },
+          mutations: {
+            add(state, n) {
+              state.count += n;
+              state.history = [...state.history, n];
+            },
+            reset(state) {
+              state.count = 0;
+              state.history = [];
+            },
+          },
+          actions: {
+            asyncAdd(store, n) {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  store.commit("add", n);
+                  resolve();
+                }, 1000);
+              });
+            },
+          },
+          getters: {
+            average(state) {
+              const { length } = state.history;
+              const avg = state.history.reduce((a, c) => a + c / length, 0);
+              return Math.round((avg + Number.EPSILON) * 100) / 100;
+            },
+          },
+        });
+        module.connectStore(store, {});
+        customElements.whenDefined("uce-lib").then(() => {
+          const { define } = customElements.get("uce-lib");
+          define("my-counter", {
+            extends: "store-provider",
+            init() {
+              this.provide();
+              this.render();
+            },
+            render() {
+              this.html`
+                <p>Count is: ${this.count}</p>
+                <p>The average operation is: ${this.getters.average}</p>
+                <button onclick=${() => this.commit("add", 1)}>add 1</button>
+                <button onclick=${() => this.commit("add", 10)}>add 10</button>
+                <button onclick=${() =>
+                  this.commit("add", -12)}>subtract 12</button>
+                <button onclick=${() =>
+                  this.dispatch("asyncAdd", 1)}>async add 1</button>
+                <button onclick=${() => this.commit("reset")}>reset</button>`;
+            },
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <my-counter></my-counter>
+  </body>
 </html>
