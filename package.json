@@ -1,6 +1,6 @@
 {
   "name": "uce-dragonbinder",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "µce Custom Elements with Dragonbinder for state management",
   "main": "./cjs/index.js",
   "scripts": {
@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "basichtml": "^2.3.0",
     "coveralls": "^3.1.0",
     "dragonbinder": "^2.2.0",
     "nyc": "^15.0.1",
