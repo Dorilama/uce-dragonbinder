@@ -6,6 +6,8 @@ Use Custom Elements defined with [µce](https://github.com/WebReflection/uce) co
 
 ## Use
 
+Live example [here](https://codepen.io/dorilama/pen/bGVXyqP)
+
 ```javascript
 // Import the libraries.
 import "https://unpkg.com/uce?module";
@@ -47,7 +49,7 @@ const store = new Dragonbinder({
   },
 });
 
-// Define a Custom Element connected to the store.
+// Use µce to create a Custom Element connected to the store.
 connectStore(store);
 
 customElements.whenDefined("uce-lib").then(() => {
