@@ -1,7 +1,5 @@
-export const connectStore = (
-  store,
-  { tag = "store-provider", compare = (a, b) => a === b }
-) => {
+export const connectStore = (store, options = {}) => {
+  const { tag = "store-provider", compare = (a, b) => a === b } = options;
   customElements.whenDefined("uce-lib").then(() => {
     const { define } = customElements.get("uce-lib");
     define(tag, {

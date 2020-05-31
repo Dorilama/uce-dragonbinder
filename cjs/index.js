@@ -5,10 +5,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.connectStore = void 0;
 
-const connectStore = (store, {
-  tag = "store-provider",
-  compare = (a, b) => a === b
-}) => {
+const connectStore = (store, options = {}) => {
+  const {
+    tag = "store-provider",
+    compare = (a, b) => a === b
+  } = options;
   customElements.whenDefined("uce-lib").then(() => {
     const {
       define

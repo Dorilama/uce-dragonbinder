@@ -34,7 +34,7 @@ const store = new Dragonbinder({
   },
 });
 
-connectStore(store, {});
+connectStore(store);
 customElements.whenDefined("uce-lib").then(() => {
   const { define, render, html } = customElements.get("uce-lib");
   let add = {};

@@ -63,7 +63,7 @@
             },
           },
         });
-        module.connectStore(store, {});
+        module.connectStore(store);
         customElements.whenDefined("uce-lib").then(() => {
           const { define } = customElements.get("uce-lib");
           define("my-counter", {
