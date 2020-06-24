@@ -10,7 +10,7 @@ This is a demo project for learning purposes.
 
 ## Use
 
-Live example [here]()
+Live example [here](https://codepen.io/dorilama/pen/bGVXyqP)
 
 ```javascript
 /* import the libraries*/
@@ -70,7 +70,8 @@ customElements.whenDefined("uce-lib").then(() => {
      *  -commit: to commit mutations to the store
      *  - dispatch: to dispatch actions to the store
      *  - subscribeToStore: to add a listener to store 'set' events.
-     *                      this methods also add an unsubscribeToStore method to remove the listener.
+     *                      this methods also add an unsubscribeToStore
+     *                      method to remove the listener.
      *  - connected: as per µce docs.
      *               the provided connected method calls subscribeToStore
      *  - disconnected: as per µce docs.
