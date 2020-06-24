@@ -2,17 +2,21 @@ require("basichtml").init();
 require("uce");
 const Dragonbinder = require("dragonbinder");
 
-const { connectStore } = require("../cjs");
+const { getConnectedObj } = require("../cjs");
 
 const store = new Dragonbinder({
   state: {
     count: 0,
     history: [],
+    otherCount: 0,
   },
   mutations: {
     add(state, n) {
       state.count += n;
       state.history = [...state.history, n];
+    },
+    otherAdd(state) {
+      state.otherCount += 1;
     },
   },
   actions: {
@@ -21,7 +25,7 @@ const store = new Dragonbinder({
         setTimeout(() => {
           store.commit("add", n);
           resolve();
-        }, 10);
+        }, 500);
       });
     },
   },
@@ -34,60 +38,62 @@ const store = new Dragonbinder({
   },
 });
 
-connectStore(store);
+const connectedObj = getConnectedObj(store);
+
 customElements.whenDefined("uce-lib").then(() => {
   const { define, render, html } = customElements.get("uce-lib");
   let add = {};
   let asyncAdd = {};
   let count = {};
+  let count2 = {};
   let avg = {};
-  let badSetState = {};
-  let badSetGetters = {};
-
+  let otherCount = {};
+  let otherAdd = {};
   define("my-counter", {
-    extends: "store-provider",
+    ...connectedObj,
     init() {
-      this.provide();
       this.render();
     },
     render() {
-      this.html`<p ref=${count}>${this.count}</p> <p ref=${avg}>${
+      this.html`<p ref=${count}>${this.state.count}</p> <p ref=${avg}>${
         this.getters.average
       }</p>
-      <button ref=${add} onclick=${() => this.commit("add", 1)}>add 1</button>
-      <button ref=${asyncAdd} onclick=${() =>
-        this.dispatch("asyncAdd", 19)}>asyncAdd 19</button>
-        <button ref=${badSetState} onclick=${() => {
-        let hasThrown = false;
-        try {
-          this.count = 34;
-        } catch (e) {
-          hasThrown = true;
-        }
-        console.assert(hasThrown, "directly setting the state hasn't thrown");
-      }}>wrong set state</button>
-      <button ref=${badSetGetters} onclick=${() => {
-        let hasThrown = false;
-        try {
-          this.getters = 34;
-        } catch (e) {
-          hasThrown = true;
-        }
-        console.assert(hasThrown, "directly setting the getters hasn't thrown");
-      }}>wrong set getters</button>`;
+              <button ref=${add} onclick=${() => {
+        this.commit("add", 1);
+      }}>add 1</button>
+              <button ref=${asyncAdd} onclick=${() => {
+        this.dispatch("asyncAdd", 19);
+      }}>asyncAdd 19</button>`;
     },
   });
-  define("only-count", {
-    extends: "store-provider",
+  define("my-othercounter", {
+    ...connectedObj,
     init() {
-      this.provide(["count"]);
       this.render();
     },
-    render() {},
+    render() {
+      this.html`<p ref=${count2}>${this.state.count}</p><p ref=${otherCount}>${
+        this.state.otherCount
+      }</p> 
+              <button ref=${otherAdd} onclick=${() => {
+        this.commit("otherAdd");
+      }}>otherAdd 1</button>`;
+    },
+    connected() {
+      console.log("connected");
+      /* subscribe to the store */
+      this.subscribeToStore();
+    },
+    disconnected() {
+      console.log("disconnected");
+      /* unsubscribe to the store */
+      this.unsubscribeToStore();
+    },
   });
   render(
     document.body,
-    html`<my-counter></my-counter> <only-count></only-count>`
+    html`<my-counter></my-counter>
+      <my-othercounter data-render-on="otherCount,somestuff"></my-othercounter>`
   );
   console.assert(
     count.current.textContent === "0",
@@ -98,18 +104,25 @@ customElements.whenDefined("uce-lib").then(() => {
     count.current.textContent === "1",
     `wrong count after add 1:${count.current.textContent}`
   );
-  badSetState.current.click();
-  badSetGetters.current.click();
+  console.assert(
+    count2.current.textContent === "0",
+    `other counter rendered after count set:${count2.current.textContent}`
+  );
+  otherAdd.current.click();
+  console.assert(
+    count2.current.textContent === "1",
+    `other counter did not update count after otherAdd:${count2.current.textContent}`
+  );
+  console.assert(
+    otherCount.current.textContent === "1",
+    `wrong otherCount after otherAdd 1:${otherCount.current.textContent}`
+  );
   asyncAdd.current.click();
   setTimeout(() => {
     console.assert(
       count.current.textContent === "20",
-      `wrong count after asyncAdd 19:${count.current.textContent}`
+      `wrong count after asyncAdd:${count.current.textContent}`
     );
-    console.assert(
-      avg.current.textContent === "10",
-      `wrong average after asyncAdd 19:${avg.current.textContent}`
-    );
-    render(document.body, html`<p>done</p>`);
-  }, 50);
+  }, 1000);
+  render(document.body, html`<p>done</p>`);
 });

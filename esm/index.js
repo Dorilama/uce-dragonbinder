@@ -1,44 +1,35 @@
-export const connectStore = (store, options = {}) => {
-  const { tag = "store-provider", compare = (a, b) => a === b } = options;
-  customElements.whenDefined("uce-lib").then(() => {
-    const { define } = customElements.get("uce-lib");
-    define(tag, {
-      provide(observedProps = Object.keys(store.state)) {
-        this.observedProps = observedProps;
-        this.unsubscribeFromStore = store.on(
-          "set",
-          (store, prop, newVal, oldVal) => {
-            if (this.observedProps.includes(prop) && !compare(oldVal, newVal)) {
-              this.render();
-            }
+export const getConnectedObj = (store) => {
+  const { state, getters } = store;
+  return {
+    store,
+    state,
+    getters,
+    commit(mutationName, ...mutationArgs) {
+      store.commit(mutationName, ...mutationArgs);
+    },
+    dispatch(actionName, ...actionArgs) {
+      return new Promise((resolve) => {
+        store.dispatch(actionName, ...actionArgs).then(() => resolve());
+      });
+    },
+    subscribeToStore() {
+      const { renderOn } = this.dataset;
+      if (renderOn) {
+        const props = renderOn.split(",");
+        this.unsubscribeToStore = store.on("set", (currentStore, prop) => {
+          if (props.includes(prop)) {
+            this.render();
           }
-        );
-        observedProps.forEach((prop) => {
-          Object.defineProperty(this, prop, {
-            get() {
-              return store.state[prop];
-            },
-            set(val) {
-              throw `You need to commit an action to change the value of ${prop} in the state. E.g. this.commit('mutationName',args)`;
-            },
-          });
         });
-      },
-      disconnected() {
-        this.unsubscribeFromStore();
-      },
-      commit(mutationName, ...mutationArgs) {
-        store.commit(mutationName, ...mutationArgs);
-      },
-      dispatch(actionName, ...actionArgs) {
-        store.dispatch(actionName, ...actionArgs);
-      },
-      get getters() {
-        return store.getters;
-      },
-      set getters(val) {
-        throw `Getters can't be set. Define them in the store.`;
-      },
-    });
-  });
+      } else {
+        this.unsubscribeToStore = store.on("set", () => this.render());
+      }
+    },
+    connected() {
+      this.subscribeToStore();
+    },
+    disconnected() {
+      this.unsubscribeToStore();
+    },
+  };
 };

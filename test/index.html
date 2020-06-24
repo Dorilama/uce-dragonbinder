@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>dragonbinder-uce</title>
+    <title>uce-dragonbinder</title>
     <script>
       if (this.customElements)
         try {
@@ -26,23 +26,23 @@
     <script src="//unpkg.com/dragonbinder"></script>
     <script type="module">
       import(
-        /^(?:localhost|[0-9.]+)$/.test(location.hostname)
+        /^(?:localhost|[::1]|127(?:.d+){3})$/.test(location.hostname)
           ? "../esm/index.js"
-          : "https://unpkg.com/dragonbinder-uce?module"
+          : "https://unpkg.com/uce-dragonbinder?module"
       ).then((module) => {
         const store = new Dragonbinder({
           state: {
             count: 0,
             history: [],
+            otherCount: 0,
           },
           mutations: {
             add(state, n) {
               state.count += n;
               state.history = [...state.history, n];
             },
-            reset(state) {
-              state.count = 0;
-              state.history = [];
+            otherAdd(state) {
+              state.otherCount += 1;
             },
           },
           actions: {
@@ -51,7 +51,7 @@
                 setTimeout(() => {
                   store.commit("add", n);
                   resolve();
-                }, 1000);
+                }, 500);
               });
             },
           },
@@ -63,26 +63,49 @@
             },
           },
         });
-        module.connectStore(store);
+
+        const connectedObj = module.getConnectedObj(store);
         customElements.whenDefined("uce-lib").then(() => {
-          const { define } = customElements.get("uce-lib");
+          const { define, render, html } = customElements.get("uce-lib");
           define("my-counter", {
-            extends: "store-provider",
+            ...connectedObj,
             init() {
-              this.provide();
               this.render();
             },
             render() {
-              this.html`
-                <p>Count is: ${this.count}</p>
-                <p>The average operation is: ${this.getters.average}</p>
-                <button onclick=${() => this.commit("add", 1)}>add 1</button>
-                <button onclick=${() => this.commit("add", 10)}>add 10</button>
-                <button onclick=${() =>
-                  this.commit("add", -12)}>subtract 12</button>
-                <button onclick=${() =>
-                  this.dispatch("asyncAdd", 1)}>async add 1</button>
-                <button onclick=${() => this.commit("reset")}>reset</button>`;
+              this.html`<p>${this.state.count}</p> <p>${
+                this.getters.average
+              }</p>
+              <button onclick=${() => {
+                this.commit("add", 1);
+              }}>add 1</button>
+              <button onclick=${() => {
+                this.dispatch("asyncAdd", 19);
+              }}>asyncAdd 19</button>`;
+            },
+          });
+          define("my-othercounter", {
+            ...connectedObj,
+            init() {
+              this.render();
+            },
+            render() {
+              this.html`<p>${this.state.count}</p><p>${
+                this.state.otherCount
+              }</p> 
+              <button onclick=${() => {
+                this.commit("otherAdd");
+              }}>otherAdd 1</button>`;
+            },
+            connected() {
+              console.log("connected");
+              /* subscribe to the store */
+              this.subscribeToStore();
+            },
+            disconnected() {
+              console.log("disconnected");
+              /* unsubscribe to the store */
+              this.unsubscribeToStore();
             },
           });
         });
@@ -90,6 +113,7 @@
     </script>
   </head>
   <body>
-    <my-counter></my-counter>
+    <my-counter></my-counter
+    ><my-othercounter data-render-on="otherCount,somestuff"></my-othercounter>
   </body>
 </html>
