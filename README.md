@@ -70,8 +70,13 @@ customElements.whenDefined("uce-lib").then(() => {
      *  -commit: to commit mutations to the store
      *  - dispatch: to dispatch actions to the store
      *  - subscribeToStore: to add a listener to store 'set' events.
-     *                      this methods also add an unsubscribeToStore
+     *                      This methods also add an unsubscribeToStore
      *                      method to remove the listener.
+     *                      Default will render the component to all 'set' events.
+     *                      If you specify a 'data-render-on' attribute,
+     *                      as a string of comma-separated values,
+     *                      it will render only when the 'set' event is triggered
+     *                      by state props matching with values.
      *  - connected: as per µce docs.
      *               the provided connected method calls subscribeToStore
      *  - disconnected: as per µce docs.
@@ -117,4 +122,12 @@ customElements.whenDefined("uce-lib").then(() => {
     },
   });
 });
+```
+
+```html
+<!-- Then in your html -->
+<!-- This will render on every 'set' event -->
+<my-counter></my-counter>
+<!-- This will render only when store.state.otherCount and store.state.somestuff will change -->
+<my-othercounter data-render-on="otherCount,somestuff"></my-othercounter>
 ```
