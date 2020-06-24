@@ -1,7 +1,7 @@
 {
-  "name": "uce-dragonbinder",
+  "name": "@dorilama/uce-dragonbinder",
   "version": "0.2.0",
-  "description": "",
+  "description": "µce Custom Elements with Dragonbinder for state management",
   "main": "./cjs/index.js",
   "scripts": {
     "build": "npm run cjs && npm run rollup:es && npm run rollup:index && npm run fix:default && npm run test",
@@ -13,8 +13,8 @@
     "test": "nyc node test/index.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "dorilama",
+  "license": "MIT",
   "devDependencies": {
     "basichtml": "^2.3.0",
     "coveralls": "^3.1.0",
