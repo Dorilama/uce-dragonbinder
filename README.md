@@ -2,6 +2,8 @@
 
 Use Custom Elements defined with [µce](https://github.com/WebReflection/uce) connected to a [Dragonbinder](https://github.com/Masquerade-Circus/dragonbinder) store for state management.
 
+![Travis (.com)](https://img.shields.io/travis/com/Dorilama/uce-dragonbinder) ![Coveralls github](https://img.shields.io/coveralls/github/Dorilama/uce-dragonbinder) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@dorilama/uce-dragonbinder) ![David](https://img.shields.io/david/Dorilama/uce-dragonbinder)
+
 ---
 
 ## Disclaimer
